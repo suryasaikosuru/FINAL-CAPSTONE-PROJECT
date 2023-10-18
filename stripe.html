@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Create Payment Link</title>
+</head>
+<body>
+    <button id="paymentButton">Make Payment</button>
+
+    <script src="https://js.stripe.com/v3/">
+
+        // Load Stripe.js with your publishable key
+        const stripe = Stripe('pk_live_51O1ngeSEjNNMOOXQJ0qFyom06F96XTvOS0V8dCQl75otZf8smSp32Ync24Jnw1TtKZpfUMPTxEZ7AqGHzJWqshEQ00JhU3JmlI');
+
+        // Add an event listener to the button
+        document.getElementById('paymentButton').addEventListener('click', async () => {
+            // Create a Payment Intent on the server
+            const response = await fetch('/create-payment-intent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ amount: 1000, currency: 'usd' }), // Adjust amount and currency
+            });
+            const { clientSecret } = await response.json();
+
+            // Use the client secret to create a payment link
+            const { error } = await stripe.redirectToCheckout({
+                sessionId: clientSecret,
+            });
+
+            if (error) {
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
